@@ -1,0 +1,113 @@
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
+import { Link } from "react-router-dom";
+
+export default function Users() {
+    const [users, setUsers] = useState([]);
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        password: "",
+    });
+    const [editingId, setEditingId] = useState(null);
+
+    const fetchUsers = async () => {
+        const { data } = await api.get("/users");
+        setUsers(data?.data || []);
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const submitForm = async (e) => {
+        e.preventDefault();
+
+        if (editingId) {
+            await api.put(`/users/${editingId}`, form);
+        } else {
+            await api.post("/users", form);
+        }
+
+        setForm({ name: "", email: "", password: "" });
+        setEditingId(null);
+        fetchUsers();
+    };
+
+    const editUser = (user) => {
+        setEditingId(user._id);
+        setForm({
+            name: user.name,
+            email: user.email,
+            password: "",
+        });
+    };
+
+    const deleteUser = async (id) => {
+        if (!confirm("Delete user?")) return;
+        await api.delete(`/users/${id}`);
+        fetchUsers();
+    };
+
+    return (
+        <div>
+            <h1>Users API Tester</h1>
+
+            {/* CREATE / UPDATE */}
+            <form onSubmit={submitForm}>
+                <h3>{editingId ? "Update User" : "Create User"}</h3>
+
+                <input
+                    name="name"
+                    placeholder="Name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                />
+
+                <input
+                    name="email"
+                    placeholder="Email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                />
+
+                <input
+                    name="password"
+                    placeholder="Password"
+                    value={form.password}
+                    onChange={handleChange}
+                    required={!editingId}
+                />
+
+                <button type="submit">
+                    {editingId ? "Update" : "Create"}
+                </button>
+            </form>
+
+            <hr />
+
+            {/* LIST */}
+            <h3>All Users</h3>
+            <ul>
+                {users.map((u) => (
+                    <li key={u._id}>
+                        <strong>{u.name}</strong> – {u.email}
+
+                        <button onClick={() => editUser(u)}>Edit</button>
+                        <button onClick={() => deleteUser(u._id)}>Delete</button>
+
+                        <Link to={`/users/${u._id}/hiring-drives`}>
+                            Hiring Drives
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
