@@ -9,6 +9,7 @@ import Exams from "../pages/exams/Exams";
 import Results from "../pages/result/Results";
 import Login from "../pages/login/Login";
 import Proctoring from "../pages/Proctoring/Proctoring";
+import UserResult from "../pages/users/UserResult";
 
 export default function AppRouter() {
     return (
@@ -21,6 +22,10 @@ export default function AppRouter() {
                 <Route
                     path="/users/:userId/hiring-drives"
                     element={<UserHiringDrives />}
+                />
+                <Route
+                    path="/users/:hiringDriveId/results"
+                    element={<UserResult />}
                 />
 
                 {/* HiringDrives */}

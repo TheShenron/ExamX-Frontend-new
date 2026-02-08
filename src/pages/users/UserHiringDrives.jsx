@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import { DateTime } from "luxon";
+
+const formatDateTime = (iso) => {
+    if (!iso) return "-";
+    return DateTime.fromISO(iso).toFormat("dd LLL yyyy, hh:mm a");
+};
 
 export default function UserHiringDrives() {
+    const navigate = useNavigate();
     const { userId } = useParams();
     const [drives, setDrives] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const viewResult = (driveId) => {
+        navigate(`/users/${driveId}/results`);
+    }
 
     useEffect(() => {
         api
@@ -19,19 +30,51 @@ export default function UserHiringDrives() {
     return (
         <div>
             <h1>User Hiring Drives</h1>
-            <Link to="/users">⬅ Back</Link>
+            <button onClick={() => navigate(-1)}>
+                ⬅ Back
+            </button>
 
-            {drives.length === 0 ? (
+            {drives?.data?.length === 0 ? (
                 <p>No hiring drives found</p>
             ) : (
-                <ul>
-                    {drives?.data?.map((d) => (
-                        <li key={d._id}>
-                            {JSON.stringify(d)}
-                        </li>
-                    ))}
-                </ul>
+                <table
+                    border="1"
+                    style={{
+                        borderCollapse: "collapse",
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Starts At</th>
+                            <th>Ends At</th>
+                            <th>Status</th>
+                            <th>Attempts Used</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {drives?.data?.map((d) => (
+                            <tr key={d._id}>
+                                <td>{d.name}</td>
+                                <td>
+                                    <b>{d.code}</b>
+                                </td>
+                                <td>{formatDateTime(d.startsAt)}</td>
+                                <td>{formatDateTime(d.endsAt)}</td>
+                                <td style={{ color: d.isActive ? "green" : "red" }}>
+                                    {d.isActive ? "Active ✅" : "Inactive ❌"}
+                                </td>
+                                <td>{d.attemptsUsed}</td>
+                                <td><button onClick={() => viewResult(d._id)}>View Result</button></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             )}
+
         </div>
     );
 }

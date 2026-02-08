@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { DateTime } from "luxon";
+
+const formatDateTime = (iso) => {
+    if (!iso) return "-";
+    return DateTime.fromISO(iso).toFormat("dd LLL yyyy, hh:mm a");
+};
+
 
 export default function Exams() {
     const [exams, setExams] = useState([]);
@@ -12,6 +19,7 @@ export default function Exams() {
         duration: 60,
         createdBy: "",
         isActive: true,
+        examZipFile: null,
     });
 
     const fetchExams = async () => {
@@ -31,6 +39,11 @@ export default function Exams() {
         });
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        setForm((prev) => ({ ...prev, examZipFile: file }));
+    };
+
     const submitForm = async (e) => {
         e.preventDefault();
 
@@ -40,7 +53,19 @@ export default function Exams() {
                 updatedBy: form.createdBy,
             });
         } else {
-            await api.post("/exams", form);
+
+            const formData = new FormData();
+            formData.append("title", form.title);
+            formData.append("description", form.description);
+            formData.append("difficulty", form.difficulty);
+            formData.append("duration", String(form.duration));
+            formData.append("createdBy", form.createdBy);
+            formData.append("isActive", String(form.isActive));
+            formData.append("examZipFile", form.examZipFile);
+
+            await api.post("/exams", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
         }
 
         resetForm();
@@ -141,6 +166,14 @@ export default function Exams() {
                     Active
                 </label>
 
+                <input
+                    type="file"
+                    name="examZipFile"
+                    accept=".zip"
+                    onChange={handleFileChange}
+                    required
+                />
+
                 <div>
                     <button type="submit">
                         {editingId ? "Update" : "Create"}
@@ -157,19 +190,78 @@ export default function Exams() {
 
             {/* LIST */}
             <h3>All Exams</h3>
-            <ul>
-                {exams?.map((e) => (
-                    <li key={e._id}>
-                        <strong>{e.title}</strong> — {e.difficulty} — {e.duration} min
-                        {!e.isActive && " (inactive)"}
+            {exams?.length === 0 ? (
+                <p>No exams found</p>
+            ) : (
+                <table
+                    border="1"
+                    style={{
+                        borderCollapse: "collapse",
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Difficulty</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th>Created By</th>
+                            <th>Updated At</th>
+                            <th>Updated By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-                        <div>
-                            <button onClick={() => editExam(e)}>Edit</button>
-                            <button onClick={() => deleteExam(e._id)}>Delete</button>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                    <tbody>
+                        {exams?.map((e) => (
+                            <tr key={e._id}>
+                                <td>
+                                    <b>{e.title}</b>
+                                </td>
+
+                                <td>{e.description || "-"}</td>
+
+                                <td style={{ textTransform: "capitalize" }}>
+                                    {e.difficulty || "-"}
+                                </td>
+
+                                <td>{e.duration} min</td>
+
+                                <td style={{ color: e.isActive ? "green" : "red" }}>
+                                    {e.isActive ? "Active ✅" : "Inactive ❌"}
+                                </td>
+
+                                <td>{formatDateTime(e.createdAt)}</td>
+
+                                <td>
+                                    {e.createdBy?.name || "-"}
+                                    {/* <br />
+                                    <span style={{ fontSize: 12, color: "#666" }}>
+                                        {e.createdBy?.email || ""}
+                                    </span> */}
+                                </td>
+
+                                <td>{formatDateTime(e.updatedAt)}</td>
+
+                                <td>
+                                    {e.updatedBy?.name || "-"}
+                                    {/* <br />
+                                    <span style={{ fontSize: 12, color: "#666" }}>
+                                        {e.updatedBy?.email || ""}
+                                    </span> */}
+                                </td>
+
+                                <td style={{ display: "flex", gap: 10 }}>
+                                    <button onClick={() => editExam(e)}>Edit</button>
+                                    <button onClick={() => deleteExam(e._id)}>Delete</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 }

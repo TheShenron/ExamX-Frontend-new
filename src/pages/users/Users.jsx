@@ -28,6 +28,9 @@ export default function Users() {
         e.preventDefault();
 
         if (editingId) {
+            if (form.password === "") {
+                delete form.password;
+            }
             await api.put(`/users/${editingId}`, form);
         } else {
             await api.post("/users", form);
@@ -94,20 +97,43 @@ export default function Users() {
 
             {/* LIST */}
             <h3>All Users</h3>
-            <ul>
-                {users.map((u) => (
-                    <li key={u._id}>
-                        <strong>{u.name}</strong> – {u.email}
 
-                        <button onClick={() => editUser(u)}>Edit</button>
-                        <button onClick={() => deleteUser(u._id)}>Delete</button>
+            <table
+                border="1"
+                style={{
+                    borderCollapse: "collapse",
+                }}
+            >
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-                        <Link to={`/users/${u._id}/hiring-drives`}>
-                            Hiring Drives
-                        </Link>
-                    </li>
-                ))}
-            </ul>
+                <tbody>
+                    {users.map((u) => (
+                        <tr key={u._id}>
+                            <td>
+                                <b>{u.name}</b>
+                            </td>
+
+                            <td>{u.email}</td>
+
+                            <td style={{ display: "flex", gap: 10 }}>
+                                <button onClick={() => editUser(u)}>Edit</button>
+                                <button onClick={() => deleteUser(u._id)}>Delete</button>
+
+                                <Link to={`/users/${u._id}/hiring-drives`}>
+                                    Hiring Drives
+                                </Link>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
         </div>
     );
 }

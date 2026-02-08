@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../api/axios";
 
+import { DateTime } from "luxon";
+
+const formatDateTime = (iso) => {
+    if (!iso) return "-";
+    return DateTime.fromISO(iso).toFormat("dd LLL yyyy, hh:mm a");
+};
+
 export default function HiringDriveDetails() {
     const { id } = useParams();
     const [drive, setDrive] = useState(null);
@@ -60,8 +67,7 @@ export default function HiringDriveDetails() {
     return (
         <div>
             <Link to="/hiring-drives">⬅ Back</Link>
-            <h1>{drive?.count}</h1>
-            {console.log(drive)}
+            <h3> Total Drive Count: {drive?.count}</h3>
 
             <h3>Candidates</h3>
             <input
@@ -71,22 +77,56 @@ export default function HiringDriveDetails() {
             />
             <button onClick={addCandidate}>Add Candidate</button>
 
-            <ul>
-                {drive?.data?.map((c) => (
-                    <li key={c?.userId?._id}>
-                        {console.log(c)}
-                        {c.userId?.name || c.userId?._id} — Attempts: {c.attemptsUsed}
-                        <button onClick={() => removeCandidate(c.userId?._id)}>Remove</button>
-                        <button onClick={() => incAttempts(c.userId?._id)}>
-                            Attempts+1
-                        </button>
+            {drive?.data?.length === 0 ? (
+                <p>No candidates found</p>
+            ) : (
+                <table
+                    border="1"
+                    style={{
+                        borderCollapse: "collapse",
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Attempts Used</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
 
-                        <button onClick={() => decAttempts(c.userId?._id)}>
-                            Attempts-1
-                        </button>
-                    </li>
-                ))}
-            </ul>
+                    <tbody>
+                        {drive?.data?.map((c) => (
+                            <tr key={c?.userId?._id}>
+                                <td>
+                                    <b>{c.userId?.name || "-"}</b>
+                                </td>
+
+                                <td>{c.userId?.email || "-"}</td>
+
+                                <td>
+                                    <b>{c.attemptsUsed}</b>
+                                </td>
+
+                                <td style={{ display: "flex", gap: 10 }}>
+                                    <button onClick={() => incAttempts(c.userId?._id)}>
+                                        Attempts +1
+                                    </button>
+
+                                    <button onClick={() => decAttempts(c.userId?._id)}>
+                                        Attempts -1
+                                    </button>
+
+                                    <button onClick={() => removeCandidate(c.userId?._id)}>
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+            )}
 
             <h3>Exams</h3>
             <input
@@ -96,14 +136,56 @@ export default function HiringDriveDetails() {
             />
             <button onClick={addExam}>Add Exam</button>
 
-            <ul>
-                {exam?.data?.map((e) => (
-                    <li key={e?._id}>
-                        {JSON.stringify(e)}
-                        <button onClick={() => removeExam(e?._id)}>Remove</button>
-                    </li>
-                ))}
-            </ul>
+            {exam?.data?.length === 0 ? (
+                <p>No exams found</p>
+            ) : (
+                <table
+                    border="1"
+                    style={{
+                        borderCollapse: "collapse",
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Difficulty</th>
+                            <th>Duration (min)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {exam?.data?.map((e) => (
+                            <tr key={e?._id}>
+                                <td>
+                                    <b>{e?.title || "-"}</b>
+                                </td>
+
+                                <td>{e?.description || "-"}</td>
+
+                                <td style={{ textTransform: "capitalize" }}>
+                                    {e?.difficulty || "-"}
+                                </td>
+
+                                <td>{e?.duration ?? "-"}</td>
+
+                                <td style={{ color: e?.isActive ? "green" : "red" }}>
+                                    {e?.isActive ? "Active ✅" : "Inactive ❌"}
+                                </td>
+
+                                <td>
+                                    <button onClick={() => removeExam(e?._id)}>
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
+
         </div>
     );
 }

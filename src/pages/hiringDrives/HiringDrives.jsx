@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { Link } from "react-router-dom";
 
+import { DateTime } from "luxon";
+
+const formatDateTime = (iso) => {
+    if (!iso) return "-";
+    return DateTime.fromISO(iso).toFormat("dd LLL yyyy, hh:mm a");
+};
+
 export default function HiringDrives() {
     const [drives, setDrives] = useState([]);
     const [form, setForm] = useState({
@@ -79,15 +86,73 @@ export default function HiringDrives() {
             <hr />
 
             <h3>All Drives</h3>
-            <ul>
-                {drives?.data?.map((d) => (
-                    <li key={d._id}>
-                        <strong>{d.name}</strong> ({d.code})
-                        <Link to={`/hiring-drives/${d._id}`}> Manage</Link>
-                        <button onClick={() => deleteDrive(d._id)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
+
+            {drives?.data?.length === 0 ? (
+                <p>No hiring drives found</p>
+            ) : (
+                <table
+                    border="1"
+                    style={{
+                        borderCollapse: "collapse",
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Difficulty</th>
+                            <th>Passing Marks</th>
+                            <th>Starts At</th>
+                            <th>Ends At</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {drives?.data?.map((d) => (
+                            <tr key={d._id}>
+                                <td>
+                                    <b>{d.name}</b>
+                                </td>
+
+                                <td>
+                                    <b>{d.code}</b>
+                                </td>
+
+                                <td style={{ textTransform: "capitalize" }}>
+                                    {d.difficulty || "-"}
+                                </td>
+
+                                <td>{d.passingMarks ?? "-"}</td>
+
+                                <td>{formatDateTime(d.startsAt)}</td>
+
+                                <td>{formatDateTime(d.endsAt)}</td>
+
+                                <td style={{ color: d.isActive ? "green" : "red" }}>
+                                    {d.isActive ? "Active ✅" : "Inactive ❌"}
+                                </td>
+
+                                <td>{formatDateTime(d.createdAt)}</td>
+
+                                <td>{formatDateTime(d.updatedAt)}</td>
+
+                                <td style={{ display: "flex", gap: 10 }}>
+                                    <Link to={`/hiring-drives/${d._id}`}>Manage</Link>
+
+                                    <button onClick={() => deleteDrive(d._id)}>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
+
         </div>
     );
 }
