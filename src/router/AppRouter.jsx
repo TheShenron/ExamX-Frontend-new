@@ -7,7 +7,7 @@ import HiringDrives from "../pages/hiringDrives/HiringDrives";
 import HiringDriveDetails from "../pages/hiringDrives/HiringDriveDetails";
 import Exams from "../pages/exams/Exams";
 import Results from "../pages/result/Results";
-import Login from "../pages/Login/Login";
+import Login from '../pages/login/Login'
 import Proctoring from "../pages/Proctoring/Proctoring";
 import UserResult from "../pages/users/UserResult";
 
