@@ -17,7 +17,6 @@ export default function Exams() {
         description: "",
         difficulty: "easy",
         duration: 60,
-        createdBy: "",
         isActive: true,
         examZipFile: null,
     });
@@ -48,10 +47,7 @@ export default function Exams() {
         e.preventDefault();
 
         if (editingId) {
-            await api.put(`/exams/${editingId}`, {
-                ...form,
-                updatedBy: form.createdBy,
-            });
+            await api.put(`/exams/${editingId}`, form);
         } else {
 
             const formData = new FormData();
@@ -59,7 +55,6 @@ export default function Exams() {
             formData.append("description", form.description);
             formData.append("difficulty", form.difficulty);
             formData.append("duration", String(form.duration));
-            formData.append("createdBy", form.createdBy);
             formData.append("isActive", String(form.isActive));
             formData.append("examZipFile", form.examZipFile);
 
@@ -80,16 +75,13 @@ export default function Exams() {
             description: exam.description || "",
             difficulty: exam.difficulty,
             duration: exam.duration,
-            createdBy: exam.createdBy,
             isActive: exam.isActive,
         });
     };
 
     const deleteExam = async (id) => {
         if (!confirm("Delete exam?")) return;
-        await api.delete(`/exams/${id}`, {
-            data: { userId: form.createdBy },
-        });
+        await api.delete(`/exams/${id}`);
         fetchExams();
     };
 
@@ -100,7 +92,6 @@ export default function Exams() {
             description: "",
             difficulty: "easy",
             duration: 60,
-            createdBy: "",
             isActive: true,
         });
     };
@@ -146,14 +137,6 @@ export default function Exams() {
                     onChange={handleChange}
                     min={1}
                     max={180}
-                />
-
-                <input
-                    name="createdBy"
-                    placeholder="Created By (User ID)"
-                    value={form.createdBy}
-                    onChange={handleChange}
-                    required
                 />
 
                 <label>

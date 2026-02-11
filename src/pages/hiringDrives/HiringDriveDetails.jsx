@@ -104,6 +104,7 @@ export default function HiringDriveDetails() {
                             <th>Name</th>
                             <th>Email</th>
                             <th>Attempts Used</th>
+                            <th>Max Attempts</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -119,6 +120,10 @@ export default function HiringDriveDetails() {
 
                                 <td>
                                     <b>{c.attemptsUsed}</b>
+                                </td>
+
+                                <td>
+                                    <b>{c.maxAttempts}</b>
                                 </td>
 
                                 <td style={{ display: "flex", gap: 10 }}>

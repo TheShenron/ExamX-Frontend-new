@@ -18,6 +18,7 @@ export default function HiringDrives() {
         passingMarks: 50,
         startsAt: "",
         endsAt: "",
+        maxAttempts: 1
     });
 
     const fetchDrives = async () => {
@@ -43,6 +44,7 @@ export default function HiringDrives() {
             passingMarks: 50,
             startsAt: "",
             endsAt: "",
+            maxAttempts: 1
         });
         fetchDrives();
     };
@@ -68,6 +70,16 @@ export default function HiringDrives() {
                     <option value="medium">Medium</option>
                     <option value="hard">Hard</option>
                 </select>
+
+                <input
+                    type="number"
+                    name="maxAttempts"
+                    placeholder="Max Attempts"
+                    value={form.maxAttempts}
+                    onChange={handleChange}
+                    min={1}
+                    max={10}
+                />
 
                 <input
                     type="number"
@@ -102,6 +114,7 @@ export default function HiringDrives() {
                             <th>Code</th>
                             <th>Difficulty</th>
                             <th>Passing Marks</th>
+                            <th>Max Attempts</th>
                             <th>Starts At</th>
                             <th>Ends At</th>
                             <th>Status</th>
@@ -127,6 +140,8 @@ export default function HiringDrives() {
                                 </td>
 
                                 <td>{d.passingMarks ?? "-"}</td>
+
+                                <td>{d.maxAttempts ?? "-"}</td>
 
                                 <td>{formatDateTime(d.startsAt)}</td>
 
